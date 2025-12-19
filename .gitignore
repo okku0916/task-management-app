@@ -30,3 +30,13 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# OS
+.DS_Store
+
+# Go
+/backend/backend
+/backend/bin/
+
+# Docker
+.docker/
