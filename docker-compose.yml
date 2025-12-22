@@ -29,12 +29,14 @@ services:
       timeout: 5s
       retries: 5
 
-  # フロントエンドは枠だけ用意
   frontend:
-    image: node:20-alpine
-    working_dir: /app
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile # この後作成します
     volumes:
       - ./frontend:/app
+      - /app/node_modules # コンテナ内のライブラリを優先
     ports:
       - "3000:3000"
-    tty: true
+    environment:
+      - WATCHPACK_POLLING=true # Windows/Macでホットリロードを安定させる
