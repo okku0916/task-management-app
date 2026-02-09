@@ -1,6 +1,7 @@
 package main
 
 import (
+<<<<<<< HEAD
 	"encoding/json" // json変換用
 	"fmt"
 	"log"
@@ -10,6 +11,15 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Postgresドライバをインポート
+=======
+    "fmt"
+    "log"
+    "net/http"
+    "os"
+
+    "github.com/jmoiron/sqlx"
+    _ "github.com/lib/pq" // Postgresドライバをインポート
+>>>>>>> bea71ac03027e6419c90a47a656104f17721916d
 )
 
 // Task 構造体 (DBのテーブルとJSONの両方に対応)
@@ -35,8 +45,12 @@ func main() {
 		host, user, password, dbname)
 
 	// 3. DBへ接続
+<<<<<<< HEAD
 	var err error
 	db, err = sqlx.Connect("postgres", dsn)
+=======
+	db, err := sqlx.Connect("postgres", dsn)
+>>>>>>> bea71ac03027e6419c90a47a656104f17721916d
 	if err != nil {
 		log.Fatalln("Failed to connect to database:", err)
 	}
@@ -44,6 +58,7 @@ func main() {
 
 	fmt.Println("Successfully connected to the database!")
 
+<<<<<<< HEAD
 	// 接続確認用
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "API Server is running. Access /tasks to see data.")
@@ -79,3 +94,13 @@ func getTasksHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(tasks)
 }
+=======
+	// 接続確認用のAPI
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Connected to DB and Server is running!")
+	})
+
+	fmt.Println("Server starting at :8080...")
+	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+>>>>>>> bea71ac03027e6419c90a47a656104f17721916d
