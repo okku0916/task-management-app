@@ -7,6 +7,9 @@ WORKDIR /app
 # ライブリロード（コード変更時に自動再起動）ツールをインストール
 RUN go install github.com/air-verse/air@latest
 
+# コンテナ内でマイグレーションコマンドを使えるようにツールをインストール
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 # ソースコードをコピー
 COPY . .
 
