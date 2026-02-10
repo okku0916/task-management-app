@@ -1,0 +1,36 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+
+export default function DeleteButton({ id }: { id: number }) {
+	const router = useRouter();
+
+	const handleDelete = async () => {
+		if (!confirm("本当にこのタスクを削除しますか？")) return;
+
+		// クエリパラメータにIDをのせて送信
+		const res = await fetch(`http://localhost:8080/tasks?id=${id}`, {
+			method: "DELETE",
+		});
+
+		if (res.ok) {
+			router.refresh(); // リストを更新
+		} else {
+			alert("削除に失敗しました");
+		}
+	};
+
+	return (
+		<button
+		onClick={handleDelete}
+		className="text-red-500 hover:text-red-700 transition-colors p-2 flex items-center gap-1 border border-red-100 rounded-md hover:bg-red-50"
+		title="削除"
+		>
+		{/* アイコンが見えない時のためにテキストも追加 */}
+		<span className="text-xs font-bold">削除</span>
+		<svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+		<path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+		</svg>
+		</button>
+	);
+}

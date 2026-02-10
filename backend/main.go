@@ -26,7 +26,7 @@ var db *sqlx.DB
 func main() {
 	// 1. DB接続設定
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
-		os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
+	os.Getenv("DB_HOST"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
 	var err error
 	db, err = sqlx.Connect("postgres", dsn)
@@ -42,7 +42,7 @@ func main() {
 	http.HandleFunc("/tasks", func(w http.ResponseWriter, r *http.Request) {
 		// CORS設定 (ブラウザからのアクセスを許可)
 		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, DELETE, PUT, OPTIONS")
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
 		// プリフライトリクエスト(OPTIONS)への対応
@@ -51,9 +51,14 @@ func main() {
 			return
 		}
 
-		if r.Method == http.MethodPost {
+		switch r.Method {
+		case http.MethodPost:
 			createTaskHandler(w, r)
-		} else {
+		case http.MethodDelete: // 追加：削除リクエストの振り分け
+			deleteTaskHandler(w, r)
+		case http.MethodPut:
+			updateTaskHandler(w, r)
+		default:
 			getTasksHandler(w, r)
 		}
 	})
@@ -101,4 +106,41 @@ func createTaskHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(t)
+}
+// タスク削除 (DELETE)
+func deleteTaskHandler(w http.ResponseWriter, r *http.Request) {
+	// URLのクエリパラメータから "id" を取得 (例: /tasks?id=5)
+	id := r.URL.Query().Get("id")
+	if id == "" {
+		http.Error(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+
+	_, err := db.Exec("DELETE FROM tasks WHERE id = $1", id)
+	if err != nil {
+		log.Printf("Database error: %v", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 成功（中身は空）を返す
+}
+
+// 追加：タスク更新 (PUT)
+func updateTaskHandler(w http.ResponseWriter, r *http.Request) {
+    id := r.URL.Query().Get("id")
+    if id == "" {
+        http.Error(w, "ID is required", http.StatusBadRequest)
+        return
+    }
+
+    // ステータスを 'DONE' に更新
+    _, err := db.Exec("UPDATE tasks SET status = 'DONE' WHERE id = $1", id)
+    if err != nil {
+        log.Printf("Database error: %v", err)
+        http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+        return
+    }
+
+    w.WriteHeader(http.StatusOK)
 }
